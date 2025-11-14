@@ -28,7 +28,8 @@ def segment_text(text: str, lang: str, segment_size: int = 1990) -> List[dict]:
     rules = get_rules(lang)
     tokens = tokenize(text)
     tokens = post_process_tokens(tokens, rules)
-    return chunk_spans(tokens, rules, segment_size)
+    spans, segments = chunk_spans(tokens, rules, segment_size)
+    return spans, segments
 
 
 def segment_text_to_json(

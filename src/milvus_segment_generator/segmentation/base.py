@@ -93,6 +93,7 @@ def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int) -> L
         raise ValueError("segment_size must be a positive integer")
     
     spans: List[dict] = []
+    segmented_text = ""
     start_index = 0
     char_offset = 0
     total_tokens = len(tokens)
@@ -116,6 +117,7 @@ def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int) -> L
         segment_tokens = tokens[start_index:cut_index]
         segment_text = "".join(segment_tokens)
         segment_length = len(segment_text)
+        segmented_text += f"{segment_text}\n"
         
         spans.append({
             "span": {
@@ -127,7 +129,7 @@ def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int) -> L
         char_offset += segment_length
         start_index = cut_index
     
-    return spans
+    return spans, segmented_text
 
 
 __all__ = ["LanguageRules", "ANY_DELIM", "post_process_tokens", "chunk_spans"]

@@ -21,6 +21,14 @@ class TestTibetanChunkSpans:
             "ཚོར", "་", "མེད", "།",
             "འདུ", "་", "ཤེས", "༔", "མེད", "།"
         ]
+        expected_segmented_text = """​ཤཱ་རིའི་བུ།
+དེ་ལྟ་བས།
+ན་སྟོང་པ༎
+ཉིད་ལ་གཟུགས་མེད།
+ཚོར་མེད།​འདུ་ཤེས༔
+མེད།
+"""
+        expected_segmented_text = expected_segmented_text.replace("\u200b", "")
         expected_spans = [
             {"span": {"start": 0, "end": 11}},
             {"span": {"start": 11, "end": 20}},
@@ -30,9 +38,10 @@ class TestTibetanChunkSpans:
             {"span": {"start": 61, "end": 65}},
         ]
         # Should chunk at each ། delimiter
-        result = chunk_spans(tokens, tibetan.rules, segment_size=9)
-        assert len(result) == 6  # Three segments ending with །
-        assert result == expected_spans
+        span_result, segmented_text = chunk_spans(tokens, tibetan.rules, segment_size=9)
+        assert len(span_result) == 6  # Three segments ending with །
+        assert span_result == expected_spans
+        assert segmented_text == expected_segmented_text
 
 
 class TestEnglishChunkSpans:
@@ -48,6 +57,12 @@ class TestEnglishChunkSpans:
             "What", " ", "happen", "ed", "?",
             "Every", "thing", " ", "is", " ", "good", "."
         ]
+        expected_segmented_text = """The quick brown fox.
+It jumps over.
+The lazy dog!
+What happened?
+Everything is good.
+"""
         expected_spans = [
             {"span": {"start": 0, "end": 20}},   # "The quick brown fox."
             {"span": {"start": 20, "end": 34}},  # "It jumps over."
@@ -56,9 +71,10 @@ class TestEnglishChunkSpans:
             {"span": {"start": 61, "end": 80}},  # "Everything is good."
         ]
         
-        result = chunk_spans(tokens, english.rules, segment_size=10)
+        result, segmented_text = chunk_spans(tokens, english.rules, segment_size=10)
         assert len(result) == 5
         assert result == expected_spans
+        assert segmented_text == expected_segmented_text
 
 
 class TestChineseChunkSpans:
@@ -74,6 +90,12 @@ class TestChineseChunkSpans:
             "很", "高", "兴", "见", "到", "你", "！",
             "今", "天", "天", "气", "很", "好", "。"
         ]
+        expected_segmented_text = """我爱中国。
+这是一个测试。
+你好吗？
+很高兴见到你！
+今天天气很好。
+"""
         expected_spans = [
             {"span": {"start": 0, "end": 5}},   # "我爱中国。"
             {"span": {"start": 5, "end": 12}},  # "这是一个测试。"
@@ -82,7 +104,8 @@ class TestChineseChunkSpans:
             {"span": {"start": 23, "end": 30}},  # "今天天气很好。"
         ]
         
-        result = chunk_spans(tokens, chinese.rules, segment_size=8)
+        result,segmented_text = chunk_spans(tokens, chinese.rules, segment_size=8)
         assert len(result) == 5
         assert result == expected_spans
+        assert segmented_text == expected_segmented_text
 
