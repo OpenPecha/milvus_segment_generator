@@ -9,7 +9,7 @@ from milvus_segment_generator.segmentation.base import post_process_tokens, chun
 from milvus_segment_generator.segmentation.factory import get_rules
 
 
-def segment_text(text: str, lang: str, segment_size: int = 1990) -> List[dict]:
+def segment_text(text: str, lang: str, segment_size: int = 2200) -> List[dict]:
     """Segment text into chunks and return character spans.
     
     Args:
@@ -29,6 +29,7 @@ def segment_text(text: str, lang: str, segment_size: int = 1990) -> List[dict]:
     tokens = tokenize(text)
     tokens = post_process_tokens(tokens, rules)
     spans, segments = chunk_spans(tokens, rules, segment_size)
+    print(len(segments))
     return spans, segments
 
 

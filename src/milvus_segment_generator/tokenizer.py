@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 from typing import List
-
+import os
 try:
     from transformers import AutoTokenizer
 except ImportError as exc:
@@ -36,9 +36,10 @@ def tokenize(text: str) -> List[str]:
     Returns:
         List of decoded token strings (each token decoded individually).
     """
-    tokenizer = _get_gemma_tokenizer()
+    # tokenizer = _get_gemma_tokenizer()
     # Decode each token ID individually to get the token string
-    return tokenizer.batch_decode(tokenizer.encode(text,add_special_tokens=False),skip_special_tokens=True)
+    tokens = [char for char in text]
+    return tokens
 
 
 __all__ = ["tokenize"]
