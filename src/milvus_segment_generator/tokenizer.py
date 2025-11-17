@@ -23,7 +23,7 @@ def _get_gemma_tokenizer():
     - google/gemma-2-27b
     - google/gemma-7b
     """
-    tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-4b-it",token=os.getenv("HF_TOKEN"))
+    tokenizer = AutoTokenizer.from_pretrained("openpecha/segment_tokenizer",token=os.getenv("HF_TOKEN"))
     return tokenizer
 
 
@@ -36,11 +36,22 @@ def tokenize(text: str) -> List[str]:
     Returns:
         List of decoded token strings (each token decoded individually).
     """
-    # tokenizer = _get_gemma_tokenizer()
+    tokenizer = _get_gemma_tokenizer()
     # Decode each token ID individually to get the token string
-    tokens = [char for char in text]
-    return tokens
+    
+    return tokenizer.batch_decode(tokenizer.encode(text,add_special_tokens=False),skip_special_tokens=True)
 
+def tokenize_with_char(text: str) -> List[str]:
+    """Tokenize text with the Gemma tokenizer, returning decoded token strings.
+    
+    Args:
+        text: Input text to tokenize.
+        
+    Returns:
+        List of decoded token strings (each token decoded individually).
+    """
+    return [char for char in text]
 
+    
 __all__ = ["tokenize"]
 

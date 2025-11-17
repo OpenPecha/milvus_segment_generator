@@ -4,12 +4,12 @@ import json
 from pathlib import Path
 from typing import List
 
-from milvus_segment_generator.tokenizer import tokenize
+from milvus_segment_generator.tokenizer import tokenize, tokenize_with_char
 from milvus_segment_generator.segmentation.base import post_process_tokens, chunk_spans
 from milvus_segment_generator.segmentation.factory import get_rules
 
 
-def segment_text(text: str, lang: str, segment_size: int = 2200) -> List[dict]:
+def segment_text(text: str, lang: str, segment_size: int = 1990) -> List[dict]:
     """Segment text into chunks and return character spans.
     
     Args:
@@ -29,7 +29,10 @@ def segment_text(text: str, lang: str, segment_size: int = 2200) -> List[dict]:
     tokens = tokenize(text)
     tokens = post_process_tokens(tokens, rules)
     spans, segments = chunk_spans(tokens, rules, segment_size)
-    print(len(segments))
+    if len(text) > spans[-1]["span"]["end"]:
+        tokens = tokenize_with_char(text)
+        tokens = post_process_tokens(tokens, rules)
+        spans, segments = chunk_spans(tokens, rules, segment_size=2200)
     return spans, segments
 
 
