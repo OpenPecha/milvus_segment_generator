@@ -23,7 +23,8 @@ def _get_gemma_tokenizer():
     - google/gemma-2-27b
     - google/gemma-7b
     """
-    return AutoTokenizer.from_pretrained("google/gemma-3-4b-it")
+    tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-4b-it",token=os.getenv("HF_TOKEN"))
+    return tokenizer
 
 
 def tokenize(text: str) -> List[str]:
