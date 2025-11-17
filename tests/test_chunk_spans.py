@@ -12,7 +12,7 @@ class TestTibetanChunkSpans:
     
     def test_tibetan_realistic_sentence(self):
         """Test chunking with realistic character-level Tibetan sentence."""
-        # Character and subword level tokenization like Gemma produces
+        # Character and subword level tokenization like Gemma tokenizer produces
         tokens = [
             "ཤ", "ཱ", "་", "རི", "འི", "་", "བུ", "།",
             "དེ", "་", "ལྟ", "་", "བ", "ས", "།", "ན", "་",
@@ -43,13 +43,14 @@ class TestTibetanChunkSpans:
         assert span_result == expected_spans
         assert segmented_text == expected_segmented_text
 
+        
 
 class TestEnglishChunkSpans:
     """Test span chunking for English text."""
     
     def test_english_realistic_subword_tokens(self):
         """Test English chunking with realistic subword tokenization."""
-        # Subword tokenization like Gemma produces for English
+        # Subword tokenization like Gemma tokenizer produces for English
         tokens = [
             "The", " ", "quick", " ", "brown", " ", "fox", ".",
             "It", " ", "jump", "s", " ", "over", ".",
@@ -82,7 +83,7 @@ class TestChineseChunkSpans:
     
     def test_chinese_realistic_subword_tokens(self):
         """Test Chinese chunking with realistic subword tokenization."""
-        # Subword/character tokenization like Gemma produces for Chinese
+        # Subword/character tokenization like Gemma tokenizer produces for Chinese
         tokens = [
             "我", "爱", "中", "国", "。",
             "这", "是", "一", "个", "测", "试", "。",

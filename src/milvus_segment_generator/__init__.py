@@ -1,4 +1,4 @@
-"""Milvus Segment Generator - Multi-language text segmentation using Gemma3 tokenizer."""
+"""Milvus Segment Generator - Multi-language text segmentation using Gemma tokenizer."""
 
 from milvus_segment_generator.segment import segment_text, segment_text_to_json
 from milvus_segment_generator.segmentation.factory import list_supported_languages

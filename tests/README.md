@@ -84,7 +84,7 @@ The test suite covers:
 ## Test Data Characteristics
 
 ### Realistic Tokenization
-All tests use realistic token patterns that match actual Gemma3 tokenizer behavior:
+All tests use realistic token patterns that match actual Gemma tokenizer behavior:
 - **Tibetan**: Character-level tokens (e.g., `"ཤ", "ཱ", "་"`) and subword tokens
 - **English**: Subword splits (e.g., `"jump" + "s"`, `"happen" + "ed"`) with space tokens
 - **Chinese**: Character-level tokens (e.g., `"我", "爱", "中", "国"`)

@@ -10,18 +10,18 @@ def get_segmented_text(text: str, lang: str, segment_size: int):
 
 
 if __name__ == "__main__":
-    text_dirs = list(Path("data/input").iterdir())
-    text_dirs.sort()
-    for text_dir in text_dirs:
-        text_title = text_dir.stem
-        text_path = list(text_dir.glob("*.txt"))[0]
-        text = text_path.read_text(encoding="utf-8")
-        text = text.replace("\n", "")
-        text = text.replace("་ ", "")
-        lang = 'bo'
-        segment_size = 1990
-        spans, segments = get_segmented_text(text, lang, segment_size)
-        output_path = Path("data/output") / f"{text_title}.txt"
-        output_path.write_text(segments, encoding="utf-8")
-        print(f"Done {text_title}")
+    # text_dirs = list(Path("data/input").iterdir())
+    # text_dirs.sort()
+    # for text_dir in text_dirs:
+    #     text_title = text_dir.stem
+    #     text_path = list(text_dir.glob("*.txt"))[0]
+    text = "༄༅། །འཕགས་པ་ཤེས་རབ་ཀྱི།"
+    text = text.replace("\n", "")
+    text = text.replace("་ ", "")
+    lang = 'bo'
+    segment_size = 20
+    spans, segments = get_segmented_text(text, lang, segment_size)
+    output_path = Path("data/output") / f"{text_title}.txt"
+    output_path.write_text(segments, encoding="utf-8")
+    print(f"Done {text_title}")
     print("Done all")

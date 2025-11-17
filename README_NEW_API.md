@@ -4,7 +4,7 @@
 
 The library has been restructured to support multiple languages with a clean separation of concerns:
 
-- **Single tokenizer** (Gemma3) for all languages
+- **Single tokenizer** (Gemma from HuggingFace transformers) for all languages
 - **Language-specific rules** for delimiters and token merging
 - **Shared segmentation logic** for consistent behavior
 
@@ -104,7 +104,7 @@ langs = list_supported_languages()
 ```
 src/milvus_segment_generator/
 ├── __init__.py                    # Public API exports
-├── tokenizer.py                   # Gemma3 tokenizer (shared)
+├── tokenizer.py                   # Gemma tokenizer via transformers (shared)
 ├── segment.py                     # Main API functions
 └── segmentation/
     ├── __init__.py

@@ -29,7 +29,7 @@ class TestTibetanPostProcessing:
     
     def test_tibetan_realistic_sentence(self):
         """Test with realistic character-level Tibetan sentence tokens."""
-        # Character-level tokenization like Gemma would produce
+        # Character-level tokenization like Gemma tokenizer would produce
         tokens = [
             "ཤ", "ཱ", "་", "རི", "འི", "་", "བུ", "་",
             "དེ", "་", "ལྟ", "་", "བ", "ས", "་", "ན", "་",
