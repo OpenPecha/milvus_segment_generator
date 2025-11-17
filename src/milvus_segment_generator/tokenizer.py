@@ -52,6 +52,6 @@ def tokenize_with_char(text: str) -> List[str]:
     """
     return [char for char in text]
 
-    
+
 __all__ = ["tokenize"]
 

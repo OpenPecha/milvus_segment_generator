@@ -29,7 +29,7 @@ def segment_text(text: str, lang: str, segment_size: int = 1990) -> List[dict]:
     tokens = tokenize(text)
     tokens = post_process_tokens(tokens, rules)
     spans, segments = chunk_spans(tokens, rules, segment_size)
-    if len(text) > spans[-1]["span"]["end"]:
+    if len(text) < spans[-1]["span"]["end"]:
         tokens = tokenize_with_char(text)
         tokens = post_process_tokens(tokens, rules)
         spans, segments = chunk_spans(tokens, rules, segment_size=2200)
