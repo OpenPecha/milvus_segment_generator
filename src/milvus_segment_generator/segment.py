@@ -26,13 +26,13 @@ def segment_text(text: str, lang: str, segment_size: int = 1990) -> List[dict]:
         [{"span": {"start": 0, "end": 15}}]
     """
     rules = get_rules(lang)
-    tokens = tokenize(text)
+    tokens, has_delimiter = tokenize(text, rules)
     tokens = post_process_tokens(tokens, rules)
-    spans, segments = chunk_spans(tokens, rules, segment_size)
+    spans, segments = chunk_spans(tokens, rules, segment_size, has_delimiter)
     if len(text) < spans[-1]["span"]["end"]:
-        tokens = tokenize_with_char(text)
+        tokens, has_delimiter = tokenize_with_char(text, rules)
         tokens = post_process_tokens(tokens, rules)
-        spans, segments = chunk_spans(tokens, rules, segment_size=2200)
+        spans, segments = chunk_spans(tokens, rules, segment_size=2200, has_delimiter=has_delimiter)
     return spans, segments
 
 

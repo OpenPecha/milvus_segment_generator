@@ -75,7 +75,7 @@ def post_process_tokens(tokens: List[str], rules: LanguageRules) -> List[str]:
     return merged
 
 
-def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int) -> List[dict]:
+def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int, has_delimiter: bool) -> List[dict]:
     """Chunk tokens into segments ending at delimiters and return character spans.
     
     Args:
@@ -97,6 +97,7 @@ def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int) -> L
     start_index = 0
     char_offset = 0
     total_tokens = len(tokens)
+    
     
     while start_index < total_tokens:
         upper_bound = min(start_index + segment_size, total_tokens)
@@ -128,6 +129,10 @@ def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int) -> L
         
         char_offset += segment_length
         start_index = cut_index
+    
+    if not has_delimiter:
+        spans[-1]["span"]["end"] = spans[-1]['span']['end'] - 1
+        segmented_text = segmented_text[:-2]
     
     return spans, segmented_text.strip()
 

@@ -27,7 +27,7 @@ def _get_gemma_tokenizer():
     return tokenizer
 
 
-def tokenize(text: str) -> List[str]:
+def tokenize(text: str, rules) -> List[str]:
     """Tokenize text with the Gemma tokenizer, returning decoded token strings.
     
     Args:
@@ -38,10 +38,14 @@ def tokenize(text: str) -> List[str]:
     """
     tokenizer = _get_gemma_tokenizer()
     # Decode each token ID individually to get the token string
-    
-    return tokenizer.batch_decode(tokenizer.encode(text,add_special_tokens=False),skip_special_tokens=True)
 
-def tokenize_with_char(text: str) -> List[str]:
+    tokens = tokenizer.batch_decode(tokenizer.encode(text,add_special_tokens=False),skip_special_tokens=True)
+
+    tokens, has_delimiter = delimiter_check(tokens, rules)
+
+    return tokens, has_delimiter
+
+def tokenize_with_char(text: str, rules) -> List[str]:
     """Tokenize text with the Gemma tokenizer, returning decoded token strings.
     
     Args:
@@ -50,7 +54,17 @@ def tokenize_with_char(text: str) -> List[str]:
     Returns:
         List of decoded token strings (each token decoded individually).
     """
-    return [char for char in text]
+    tokens = [char for char in text]
+    tokens, has_delimiter = delimiter_check(tokens, rules)  
+    return tokens, has_delimiter
+
+
+def delimiter_check(tokens: List[str], rules) -> List[str]:
+    has_delimiter = True
+    if tokens[-1] not in rules.delimiters:
+        tokens.append(rules.delimiters[0])
+        has_delimiter = False
+    return tokens, has_delimiter
 
 
 __all__ = ["tokenize"]
