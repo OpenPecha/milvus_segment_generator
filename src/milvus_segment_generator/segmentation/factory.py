@@ -21,6 +21,7 @@ _LANGUAGE_REGISTRY: dict[str, LanguageRules] = {
     "zh": chinese.rules,
     "zho": chinese.rules,
     "cmn": chinese.rules,
+    "lzh": chinese.rules,
 }
 
 

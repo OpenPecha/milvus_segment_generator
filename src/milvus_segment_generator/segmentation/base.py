@@ -129,7 +129,7 @@ def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int) -> L
         char_offset += segment_length
         start_index = cut_index
     
-    return spans, segmented_text
+    return spans, segmented_text.strip()
 
 
 __all__ = ["LanguageRules", "ANY_DELIM", "post_process_tokens", "chunk_spans"]
