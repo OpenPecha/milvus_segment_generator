@@ -10,6 +10,7 @@ _LANGUAGE_REGISTRY: dict[str, LanguageRules] = {
     "tibetan": tibetan.rules,
     "bo": tibetan.rules,
     "bod": tibetan.rules,
+    "tib": tibetan.rules,
     
     # English
     "english": english.rules,

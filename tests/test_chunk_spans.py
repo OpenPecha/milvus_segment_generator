@@ -37,7 +37,7 @@ class TestTibetanChunkSpans:
             {"span": {"start": 61, "end": 65}},
         ]
         # Should chunk at each ། delimiter
-        span_result, segmented_text = chunk_spans(tokens, tibetan.rules, segment_size=9)
+        span_result, segmented_text = chunk_spans(tokens, tibetan.rules, segment_size=9, has_delimiter=True)
         assert len(span_result) == 6  # Three segments ending with །
         assert span_result == expected_spans
         assert segmented_text == expected_segmented_text
@@ -70,7 +70,7 @@ Everything is good."""
             {"span": {"start": 61, "end": 80}},  # "Everything is good."
         ]
         
-        result, segmented_text = chunk_spans(tokens, english.rules, segment_size=10)
+        result, segmented_text = chunk_spans(tokens, english.rules, segment_size=10, has_delimiter=True)
         assert len(result) == 5
         assert result == expected_spans
         assert segmented_text == expected_segmented_text
@@ -79,19 +79,19 @@ Everything is good."""
 def test_chunk_spans_empty_tokens_returns_empty():
     """When tokens list is empty, chunk_spans should return no spans and empty text."""
     tokens = []
-    result, segmented_text = chunk_spans(tokens, tibetan.rules, segment_size=5)
+    result, segmented_text = chunk_spans(tokens, tibetan.rules, segment_size=5, has_delimiter=True)
     assert result == []
     assert segmented_text == ""
 
 def test_chunk_spans_empty_tokens_english_returns_empty():
     """Empty tokens for English should yield no spans and empty text."""
-    result, segmented_text = chunk_spans([], english.rules, segment_size=5)
+    result, segmented_text = chunk_spans([], english.rules, segment_size=5, has_delimiter=True)
     assert result == []
     assert segmented_text == ""
 
 def test_chunk_spans_empty_tokens_chinese_returns_empty():
     """Empty tokens for Chinese should yield no spans and empty text."""
-    result, segmented_text = chunk_spans([], chinese.rules, segment_size=5)
+    result, segmented_text = chunk_spans([], chinese.rules, segment_size=5, has_delimiter=True)
     assert result == []
     assert segmented_text == ""
 
@@ -99,7 +99,7 @@ def test_smaller_than_segment_size_tibetan_single_segment():
     """Tokens fewer than segment_size should still produce a single segment if ending with delimiter."""
     tokens = ["བདེ", "་", "ལེགས", "།"]
     # segment_size much larger than tokens length
-    result, segmented_text = chunk_spans(tokens, tibetan.rules, segment_size=50)
+    result, segmented_text = chunk_spans(tokens, tibetan.rules, segment_size=50, has_delimiter=True)
     # Entire text is one segment
     assert result == [{"span": {"start": 0, "end": 9}}]
     assert segmented_text == "བདེ་ལེགས།"
@@ -107,7 +107,7 @@ def test_smaller_than_segment_size_tibetan_single_segment():
 def test_smaller_than_segment_size_english_single_segment():
     """English tokens fewer than segment_size should form one segment if last token is a delimiter."""
     tokens = ["Hello", ".", " ", "World", "!"]
-    result, segmented_text = chunk_spans(tokens, english.rules, segment_size=50)
+    result, segmented_text = chunk_spans(tokens, english.rules, segment_size=50, has_delimiter=True)
     # One segment covering the entire string ending with '!'
     assert result == [{"span": {"start": 0, "end": 13}}]
     # Do not assert exact segmented_text formatting to avoid newline sensitivity
@@ -116,7 +116,7 @@ def test_smaller_than_segment_size_english_single_segment():
 def test_smaller_than_segment_size_chinese_single_segment():
     """Chinese tokens fewer than segment_size should form one segment if last token is a delimiter."""
     tokens = ["你", "好", "。"]
-    result, segmented_text = chunk_spans(tokens, chinese.rules, segment_size=50)
+    result, segmented_text = chunk_spans(tokens, chinese.rules, segment_size=50, has_delimiter=True)
     assert result == [{"span": {"start": 0, "end": 3}}]
     assert segmented_text == "你好。"
 
@@ -147,7 +147,7 @@ class TestChineseChunkSpans:
             {"span": {"start": 23, "end": 30}},  # "今天天气很好。"
         ]
         
-        result,segmented_text = chunk_spans(tokens, chinese.rules, segment_size=8)
+        result,segmented_text = chunk_spans(tokens, chinese.rules, segment_size=8, has_delimiter=True)
         assert len(result) == 5
         assert result == expected_spans
         assert segmented_text == expected_segmented_text
