@@ -6,6 +6,7 @@ from typing import List, Tuple
 # Placeholder for merge templates to indicate "any delimiter from the rule set"
 ANY_DELIM = "DELIM"
 MAX_SEGMENT_CHAR_SPAN = 65_535
+MAX_SEGMENT_UTF8_BYTES = 65_535
 
 
 @dataclass(frozen=True)
@@ -91,13 +92,40 @@ def _find_split_end(segment_text: str, start: int, candidate_end: int, delimiter
     return candidate_end
 
 
+def _find_max_utf8_safe_end(
+    segment_text: str,
+    start: int,
+    end_bound: int,
+    max_segment_utf8_bytes: int,
+) -> int:
+    """Find the furthest character end whose UTF-8 byte length stays within the limit."""
+    low = start
+    high = end_bound
+    best = start
+
+    while low <= high:
+        mid = (low + high) // 2
+        byte_length = len(segment_text[start:mid].encode("utf-8"))
+        if byte_length <= max_segment_utf8_bytes:
+            best = mid
+            low = mid + 1
+        else:
+            high = mid - 1
+
+    return best
+
+
 def _split_segment_text(
     segment_text: str,
     delimiters: Tuple[str, ...],
     max_segment_char_span: int,
+    max_segment_utf8_bytes: int = MAX_SEGMENT_UTF8_BYTES,
 ) -> List[Tuple[int, int]]:
-    """Split a segment into relative contiguous bounds that satisfy max length."""
-    if len(segment_text) <= max_segment_char_span:
+    """Split a segment into contiguous bounds that satisfy char and UTF-8 byte limits."""
+    if (
+        len(segment_text) <= max_segment_char_span
+        and len(segment_text.encode("utf-8")) <= max_segment_utf8_bytes
+    ):
         return [(0, len(segment_text))]
 
     bounds: List[Tuple[int, int]] = []
@@ -105,7 +133,16 @@ def _split_segment_text(
     text_end = len(segment_text)
 
     while cursor < text_end:
-        candidate_end = min(cursor + max_segment_char_span, text_end)
+        char_limited_end = min(cursor + max_segment_char_span, text_end)
+        byte_limited_end = _find_max_utf8_safe_end(
+            segment_text,
+            cursor,
+            char_limited_end,
+            max_segment_utf8_bytes,
+        )
+        candidate_end = min(char_limited_end, byte_limited_end)
+        if candidate_end <= cursor:
+            candidate_end = min(cursor + 1, text_end)
         if candidate_end < text_end:
             split_end = _find_split_end(segment_text, cursor, candidate_end, delimiters)
             if split_end <= cursor:
@@ -197,6 +234,7 @@ __all__ = [
     "LanguageRules",
     "ANY_DELIM",
     "MAX_SEGMENT_CHAR_SPAN",
+    "MAX_SEGMENT_UTF8_BYTES",
     "post_process_tokens",
     "chunk_spans",
 ]

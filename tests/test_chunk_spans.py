@@ -2,7 +2,11 @@
 
 import pytest
 
-from milvus_segment_generator.segmentation.base import chunk_spans, MAX_SEGMENT_CHAR_SPAN
+from milvus_segment_generator.segmentation.base import (
+    chunk_spans,
+    MAX_SEGMENT_CHAR_SPAN,
+    MAX_SEGMENT_UTF8_BYTES,
+)
 from milvus_segment_generator.segmentation.rules import tibetan, english, chinese
 
 
@@ -181,4 +185,20 @@ def test_chunk_spans_prefers_whitespace_when_splitting_oversized_segment():
     assert result[0] == {"span": {"start": 0, "end": len(prefix) + 1}}
     assert result[1] == {"span": {"start": len(prefix) + 1, "end": len(prefix) + 6}}
     assert segmented_text == f"{prefix} \nword."
+
+
+def test_chunk_spans_splits_by_utf8_bytes_for_multibyte_characters():
+    """Segments must stay within Milvus VARCHAR byte limit, not only char count."""
+    long_token = ("a" * (MAX_SEGMENT_UTF8_BYTES - 1)) + "ཀ"
+    tokens = [long_token, "."]
+
+    result, segmented_text = chunk_spans(tokens, english.rules, segment_size=10, has_delimiter=True)
+
+    assert len(result) == 2
+    first_piece = segmented_text.split("\n")[0]
+    second_piece = segmented_text.split("\n")[1]
+    assert len(first_piece.encode("utf-8")) <= MAX_SEGMENT_UTF8_BYTES
+    assert len(second_piece.encode("utf-8")) <= MAX_SEGMENT_UTF8_BYTES
+    assert result[0]["span"] == {"start": 0, "end": MAX_SEGMENT_UTF8_BYTES - 1}
+    assert result[1]["span"] == {"start": MAX_SEGMENT_UTF8_BYTES - 1, "end": len(long_token) + 1}
 
