@@ -2,7 +2,7 @@
 
 import pytest
 
-from milvus_segment_generator.segmentation.base import chunk_spans
+from milvus_segment_generator.segmentation.base import chunk_spans, MAX_SEGMENT_CHAR_SPAN
 from milvus_segment_generator.segmentation.rules import tibetan, english, chinese
 
 
@@ -151,4 +151,34 @@ class TestChineseChunkSpans:
         assert len(result) == 5
         assert result == expected_spans
         assert segmented_text == expected_segmented_text
+
+
+def test_chunk_spans_splits_oversized_segment_by_max_char_span():
+    """Oversized segments should be split into contiguous <= max-span chunks."""
+    long_token = "a" * (MAX_SEGMENT_CHAR_SPAN + 100)
+    tokens = [long_token, "."]
+
+    result, segmented_text = chunk_spans(tokens, english.rules, segment_size=10, has_delimiter=True)
+
+    assert len(result) == 2
+    assert result[0]["span"]["start"] == 0
+    assert result[0]["span"]["end"] == MAX_SEGMENT_CHAR_SPAN
+    assert result[1]["span"]["start"] == MAX_SEGMENT_CHAR_SPAN
+    assert result[1]["span"]["end"] == len(long_token) + 1
+    assert result[0]["span"]["end"] - result[0]["span"]["start"] <= MAX_SEGMENT_CHAR_SPAN
+    assert result[1]["span"]["end"] - result[1]["span"]["start"] <= MAX_SEGMENT_CHAR_SPAN
+    assert segmented_text == f"{long_token[:MAX_SEGMENT_CHAR_SPAN]}\n{long_token[MAX_SEGMENT_CHAR_SPAN:] + '.'}"
+
+
+def test_chunk_spans_prefers_whitespace_when_splitting_oversized_segment():
+    """Splitting should prefer a nearby natural boundary when available."""
+    prefix = "a" * (MAX_SEGMENT_CHAR_SPAN - 5)
+    tokens = [prefix, " ", "word", "."]
+
+    result, segmented_text = chunk_spans(tokens, english.rules, segment_size=10, has_delimiter=True)
+
+    assert len(result) == 2
+    assert result[0] == {"span": {"start": 0, "end": len(prefix) + 1}}
+    assert result[1] == {"span": {"start": len(prefix) + 1, "end": len(prefix) + 6}}
+    assert segmented_text == f"{prefix} \nword."
 

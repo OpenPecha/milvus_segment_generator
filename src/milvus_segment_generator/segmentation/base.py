@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 # Placeholder for merge templates to indicate "any delimiter from the rule set"
 ANY_DELIM = "DELIM"
+MAX_SEGMENT_CHAR_SPAN = 65_535
 
 
 @dataclass(frozen=True)
@@ -75,6 +76,49 @@ def post_process_tokens(tokens: List[str], rules: LanguageRules) -> List[str]:
     return merged
 
 
+def _find_split_end(segment_text: str, start: int, candidate_end: int, delimiters: Tuple[str, ...]) -> int:
+    """Choose a split end <= candidate_end, preferring delimiters and whitespace."""
+    delimiter_set = set(delimiters)
+
+    for pos in range(candidate_end, start, -1):
+        if segment_text[pos - 1] in delimiter_set:
+            return pos
+
+    for pos in range(candidate_end, start, -1):
+        if segment_text[pos - 1].isspace():
+            return pos
+
+    return candidate_end
+
+
+def _split_segment_text(
+    segment_text: str,
+    delimiters: Tuple[str, ...],
+    max_segment_char_span: int,
+) -> List[Tuple[int, int]]:
+    """Split a segment into relative contiguous bounds that satisfy max length."""
+    if len(segment_text) <= max_segment_char_span:
+        return [(0, len(segment_text))]
+
+    bounds: List[Tuple[int, int]] = []
+    cursor = 0
+    text_end = len(segment_text)
+
+    while cursor < text_end:
+        candidate_end = min(cursor + max_segment_char_span, text_end)
+        if candidate_end < text_end:
+            split_end = _find_split_end(segment_text, cursor, candidate_end, delimiters)
+            if split_end <= cursor:
+                split_end = candidate_end
+        else:
+            split_end = candidate_end
+
+        bounds.append((cursor, split_end))
+        cursor = split_end
+
+    return bounds
+
+
 def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int, has_delimiter: bool) -> List[dict]:
     """Chunk tokens into segments ending at delimiters and return character spans.
     
@@ -93,7 +137,7 @@ def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int, has_
         raise ValueError("segment_size must be a positive integer")
     
     spans: List[dict] = []
-    segmented_text = ""
+    segmented_parts: List[str] = []
     start_index = 0
     char_offset = 0
     total_tokens = len(tokens)
@@ -117,25 +161,43 @@ def chunk_spans(tokens: List[str], rules: LanguageRules, segment_size: int, has_
         
         segment_tokens = tokens[start_index:cut_index]
         segment_text = "".join(segment_tokens)
-        segment_length = len(segment_text)
-        segmented_text += f"{segment_text}\n"
-        
-        spans.append({
-            "span": {
-                "start": char_offset,
-                "end": char_offset + segment_length
-            }
-        })
-        
-        char_offset += segment_length
+        segment_bounds = _split_segment_text(
+            segment_text,
+            rules.delimiters,
+            MAX_SEGMENT_CHAR_SPAN,
+        )
+
+        for rel_start, rel_end in segment_bounds:
+            piece = segment_text[rel_start:rel_end]
+            piece_length = rel_end - rel_start
+            segmented_parts.append(piece)
+
+            spans.append({
+                "span": {
+                    "start": char_offset,
+                    "end": char_offset + piece_length
+                }
+            })
+            char_offset += piece_length
+
         start_index = cut_index
     
-    if not has_delimiter:
+    segmented_text = "\n".join(segmented_parts)
+
+    if not has_delimiter and spans:
         spans[-1]["span"]["end"] = spans[-1]['span']['end'] - 1
-        segmented_text = segmented_text[:-2]
+        if segmented_parts:
+            segmented_parts[-1] = segmented_parts[-1][:-1]
+            segmented_text = "\n".join(segmented_parts)
     
-    return spans, segmented_text.strip()
+    return spans, segmented_text
 
 
-__all__ = ["LanguageRules", "ANY_DELIM", "post_process_tokens", "chunk_spans"]
+__all__ = [
+    "LanguageRules",
+    "ANY_DELIM",
+    "MAX_SEGMENT_CHAR_SPAN",
+    "post_process_tokens",
+    "chunk_spans",
+]
 
